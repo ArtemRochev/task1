@@ -1,0 +1,32 @@
+version: '3.5'
+
+services:
+    nginx:
+        container_name: nginx
+        image: nginx:alpine
+        ports:
+            - 80:80
+        links:
+            - 'php'
+            - 'mysql'
+        volumes:
+            - '../:/var/www/task1'
+            - './nginx:/etc/nginx/conf.d'
+
+    php:
+        container_name: php
+        expose:
+            - 9000
+        build:
+            dockerfile: php-dockerfile
+            context: .
+        volumes:
+            - '../:/var/www/task1'
+
+    mysql:
+        container_name: mysql
+        image: mysql:8.0
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+        volumes:
+            - './mysqldata:/var/lib/mysql'
