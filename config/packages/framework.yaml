@@ -17,9 +17,15 @@ framework:
     #fragments: true
     php_errors:
         log: true
-
-when@test:
-    framework:
-        test: true
-        session:
-            storage_factory_id: session.storage.factory.mock_file
+    form:
+        csrf_protection:
+            enabled: false
+    serializer:
+#        App\Entity\Task:
+#            attributes:
+#                createdAt:
+#                    contexts:
+#                        - { context: { datetime_format: 'Y-m-d' } }
+        default_context:
+            enable_max_depth: true
+            yaml_indentation: 2
