@@ -11,15 +11,14 @@ use App\Form\TaskUpdateType;
 use App\Repository\TaskRepository;
 use App\Repository\UserRepository;
 use App\Serializer\TaskNormalizer;
-use App\TaskAccessChecker;
+use App\Service\TaskAccessChecker;
+use App\Service\TaskManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Serializer\Serializer;
 
 #[Route('/task')]
@@ -35,8 +34,6 @@ class TaskController extends AbstractController
         $serializer = new Serializer([new TaskNormalizer()], []);
 
         foreach ($taskRepository->findByOwner($user->getId()) as $task) {
-            $task->setStatus('gggg');
-
             $tasks[] = $serializer->normalize($task);
         }
 
@@ -97,14 +94,10 @@ class TaskController extends AbstractController
     }
 
     #[Route('/{id}/done', methods: ['POST'])]
-    public function done(Task $task, EntityManagerInterface $entityManager, TaskAccessChecker $taskAccessChecker): Response
+    public function done(Task $task, TaskAccessChecker $taskAccessChecker, TaskManager $taskManager): Response
     {
         $taskAccessChecker->check($task, $this->getUser());
-
-        $task->setStatus(TaskStatus::Done->value);
-
-        $entityManager->persist($task);
-        $entityManager->flush();
+        $taskManager->done($task);
 
         return new JsonResponse(['ok']);
     }

@@ -6,6 +6,7 @@ namespace App\Entity;
 use App\Enum\TaskStatus;
 use App\Repository\TaskRepository;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -47,13 +48,11 @@ class Task
     #[ORM\Column(nullable: true)]
     private ?DateTimeImmutable $completedAt = null;
 
-    #[ORM\OneToOne(targetEntity: self::class, cascade: ['persist', 'remove'])]
-    private ?self $parent = null;
-
     public function __construct()
     {
         $this->status    = TaskStatus::Todo->value;
         $this->createdAt = new DateTimeImmutable();
+        $this->parent = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -141,18 +140,6 @@ class Task
     public function setOwner(?User $owner): static
     {
         $this->owner = $owner;
-
-        return $this;
-    }
-
-    public function getParent(): ?self
-    {
-        return $this->parent;
-    }
-
-    public function setParent(?self $parent): static
-    {
-        $this->parent = $parent;
 
         return $this;
     }
