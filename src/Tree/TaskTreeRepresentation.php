@@ -36,6 +36,7 @@ class TaskTreeRepresentation
             $task->getId(),
             $task->getTitle(),
             $task->getStatus(),
+            $task->getPriority(),
             $task->getCreatedAt(),
             $task->getCompletedAt(),
             $this->getChildren($taskList, $task->getId())

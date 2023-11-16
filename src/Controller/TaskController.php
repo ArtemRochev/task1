@@ -5,7 +5,6 @@ namespace App\Controller;
 
 use App\Entity\Task;
 use App\Entity\User;
-use App\Exception\TryingDeleteUnresolvedTask;
 use App\Form\TaskType;
 use App\Form\TaskUpdateType;
 use App\Repository\TaskRepository;

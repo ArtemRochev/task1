@@ -12,6 +12,7 @@ class TaskTreeNode implements JsonSerializable
         private readonly int                $id,
         private readonly string             $title,
         private readonly string             $status,
+        private readonly int                $priority,
         private readonly DateTimeImmutable  $createdAt,
         private readonly ?DateTimeImmutable $completedAt,
         private readonly array              $subtasks
@@ -52,5 +53,10 @@ class TaskTreeNode implements JsonSerializable
     public function getCompletedAt(): ?DateTimeImmutable
     {
         return $this->completedAt;
+    }
+
+    public function getPriority(): int
+    {
+        return $this->priority;
     }
 }

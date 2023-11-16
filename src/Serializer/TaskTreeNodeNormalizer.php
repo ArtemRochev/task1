@@ -13,6 +13,8 @@ class TaskTreeNodeNormalizer implements NormalizerInterface
         return [
             'id'          => $task->getId(),
             'title'       => $task->getTitle(),
+            'status'      => $task->getStatus(),
+            'priority'    => $task->getPriority(),
             'createdAt'   => $task->getCreatedAt()?->format('Y-m-d H:i:s'), // format can be given from config
             'completedAt' => $task->getCompletedAt()?->format('Y-m-d H:i:s'),
             'subtasks'    => $task->getSubtasks(),
