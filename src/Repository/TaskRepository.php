@@ -31,18 +31,35 @@ class TaskRepository extends ServiceEntityRepository
             ->andWhere('t.owner = :owner')
             ->setParameter('owner', $ownerId)
             ->orderBy('t.id', 'ASC')
-            ->setMaxResults(10)
             ->getQuery()
             ->getResult();
     }
 
-//    public function findOneBySomeField($value): ?Task
-//    {
-//        return $this->createQueryBuilder('t')
-//            ->andWhere('t.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /**
+     * @return Task[] Returns an array of Task objects
+     */
+    public function findSubtasksByOwner(int $ownerId): array
+    {
+        return $this->createQueryBuilder('t')
+            ->andWhere('t.owner = :owner')
+            ->andWhere('t.parent IS NOT NULL')
+            ->setParameter('owner', $ownerId)
+            ->orderBy('t.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @param int $parentId
+     *
+     * @return Task[]
+     */
+    public function findSubtasks(int $parentId): array
+    {
+        return $this->createQueryBuilder('t')
+            ->andWhere('t.parent = :parent')
+            ->setParameter('parent', $parentId)
+            ->getQuery()
+            ->getResult();
+    }
 }

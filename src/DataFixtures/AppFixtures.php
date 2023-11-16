@@ -30,11 +30,19 @@ class AppFixtures extends Fixture
                 for ($childTaskI = 1; $childTaskI < 3; $childTaskI++) {
                     $childTask = new Task();
                     $childTask->setOwner($user);
-                    $childTask->setTitle("Child task $childTaskI for task $taskI user " . $user->getId());
+                    $childTask->setTitle("Subtask $childTaskI for task " . $task->getId() . " user " . $user->getId());
                     $childTask->setDescription("Description");
                     $childTask->setPriority(rand(1, 5));
                     $childTask->setParent($task);
                     $manager->persist($childTask);
+
+                    $thirdLevelTask = new Task();
+                    $thirdLevelTask->setOwner($user);
+                    $thirdLevelTask->setTitle("3rd level task for task " . $childTask->getId() . " user " . $user->getId());
+                    $thirdLevelTask->setDescription("Description");
+                    $thirdLevelTask->setPriority(rand(1, 5));
+                    $thirdLevelTask->setParent($childTask);
+                    $manager->persist($thirdLevelTask);
                 }
             }
         }

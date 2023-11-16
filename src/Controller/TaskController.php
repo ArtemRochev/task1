@@ -5,39 +5,33 @@ namespace App\Controller;
 
 use App\Entity\Task;
 use App\Entity\User;
-use App\Enum\TaskStatus;
+use App\Exception\TryingDeleteUnresolvedTask;
 use App\Form\TaskType;
 use App\Form\TaskUpdateType;
 use App\Repository\TaskRepository;
-use App\Repository\UserRepository;
-use App\Serializer\TaskNormalizer;
+use App\Service\CompletedTaskChecker;
 use App\Service\TaskAccessChecker;
 use App\Service\TaskManager;
+use App\Tree\TaskTreeRepresentation;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\Serializer;
 
 #[Route('/task')]
 class TaskController extends AbstractController
 {
     #[Route('/', methods: ['GET'])]
-    public function index(TaskRepository $taskRepository, UserRepository $userRepository): Response
+    public function index(TaskRepository $taskRepository, TaskTreeRepresentation $treeRepresentation): Response
     {
         /** @var User $user */
-        $user  = $this->getUser();
-        $tasks = [];
+        $user = $this->getUser();
 
-        $serializer = new Serializer([new TaskNormalizer()], []);
-
-        foreach ($taskRepository->findByOwner($user->getId()) as $task) {
-            $tasks[] = $serializer->normalize($task);
-        }
-
-        return new JsonResponse($tasks);
+        return new JsonResponse(
+            $treeRepresentation->asTree($taskRepository->findByOwner($user->getId()))
+        );
     }
 
     #[Route('/new', methods: ['POST'])]
@@ -64,16 +58,13 @@ class TaskController extends AbstractController
         return new JsonResponse($errors);
     }
 
-    #[Route('/{id}', methods: ['GET'])]
-    public function show(Task $task): Response
-    {
-        return $this->render('task/show.html.twig', [
-            'task' => $task,
-        ]);
-    }
-
     #[Route('/{id}/edit', methods: ['POST'])]
-    public function edit(Request $request, Task $task, EntityManagerInterface $entityManager, TaskAccessChecker $taskAccessChecker): Response
+    public function edit(
+        Request                $request,
+        Task                   $task,
+        EntityManagerInterface $entityManager,
+        TaskAccessChecker      $taskAccessChecker
+    ): Response
     {
         $taskAccessChecker->check($task, $this->getUser());
 
@@ -103,15 +94,21 @@ class TaskController extends AbstractController
     }
 
     #[Route('/{id}', methods: ['DELETE'])]
-    public function delete(Request $request, Task $task, EntityManagerInterface $entityManager, TaskAccessChecker $taskAccessChecker): Response
+    public function delete(
+        Task                 $task,
+        TaskManager          $taskManager,
+        TaskAccessChecker    $taskAccessChecker,
+        CompletedTaskChecker $completedTaskChecker
+    ): Response
     {
         $taskAccessChecker->check($task, $this->getUser());
 
-        if ($this->isCsrfTokenValid('delete' . $task->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($task);
-            $entityManager->flush();
+        if ($completedTaskChecker->hasCompletedSubtasks($task)) {
+            return new JsonResponse(['Cannot delete task with completed subtasks']);
         }
 
-        return $this->redirectToRoute('app_task_index', [], Response::HTTP_SEE_OTHER);
+        $taskManager->delete($task);
+
+        return new JsonResponse(['Deleted']);
     }
 }

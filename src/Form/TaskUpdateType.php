@@ -16,7 +16,6 @@ class TaskUpdateType extends AbstractType
             ->add('description')
             ->add('priority', ChoiceType::class, [
                 'choices' => range(1, 5),
-            ])
-        ;
+            ]);
     }
 }

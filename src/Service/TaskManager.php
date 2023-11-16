@@ -10,8 +10,10 @@ use Doctrine\ORM\EntityManagerInterface;
 class TaskManager
 {
     public function __construct(
-        public EntityManagerInterface $em,
-    ) {}
+        public EntityManagerInterface $em
+    )
+    {
+    }
 
     public function done(Task $task)
     {
@@ -19,6 +21,12 @@ class TaskManager
         $task->setCompletedAt(new DateTimeImmutable());
 
         $this->em->persist($task);
+        $this->em->flush();
+    }
+
+    public function delete(Task $task)
+    {
+        $this->em->remove($task);
         $this->em->flush();
     }
 }
