@@ -13,7 +13,7 @@ php bin/console doctrine:fixtures:load -n
 
 Login (its return JWT token):
 ```
-GET http://localhostc
+POST http://localhost/login_check
 
 {
     "username": "user1",
@@ -24,7 +24,7 @@ GET http://localhostc
 API methods (attach auth header `Authorization: Bearer {token}`):
 
 ```
-http://localhost/task/new
-http://localhost/task/1/done
-http://localhost/task
+GET  http://localhost/task
+POST http://localhost/task/new
+POST http://localhost/task/1/done
 ```
